@@ -14,6 +14,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { icon: School, label: "School Management", path: "/schools" },
     { icon: MapPin, label: "Live Tracking", path: "/tracking" },
     { icon: FileText, label: "Reports", path: "/reports" },
+    { icon: FileText, label: "School List", path: "/schoollist" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ]
 

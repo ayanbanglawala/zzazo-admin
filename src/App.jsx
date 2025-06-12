@@ -12,6 +12,9 @@ import Settings from "./pages/Settings"
 import Login from "./pages/Login"
 import TEST from "./pages/TEST"
 import "./index.css"
+import SchoolList from "./pages/SchoolList"
+
+// 145.223.20.218:2002/api
 
 function App() {
   return (
@@ -27,6 +30,7 @@ function App() {
           <Route path="schools" element={<SchoolManagement />} />
           <Route path="tracking" element={<LiveTracking />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="schoollist" element={<SchoolList />} />
           <Route path="settings" element={<Settings />} />
           <Route path="TEST" element={<TEST />} />
         </Route>
