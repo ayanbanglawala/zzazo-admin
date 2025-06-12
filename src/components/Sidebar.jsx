@@ -7,15 +7,16 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const menuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-    { icon: Bus, label: "Bus Management", path: "/buses" },
-    { icon: Users, label: "Driver Management", path: "/drivers" },
-    { icon: GraduationCap, label: "Student Management", path: "/students" },
-    { icon: Map, label: "Route Management", path: "/routes" },
+    // { icon: Bus, label: "Bus Management", path: "/buses" },
+    // { icon: Users, label: "Driver Management", path: "/drivers" },
+    // { icon: GraduationCap, label: "Student Management", path: "/students" },
+    // { icon: Map, label: "Route Management", path: "/routes" },
     { icon: School, label: "School Management", path: "/schools" },
-    { icon: MapPin, label: "Live Tracking", path: "/tracking" },
-    { icon: FileText, label: "Reports", path: "/reports" },
-    { icon: FileText, label: "School List", path: "/schoollist" },
-    { icon: Settings, label: "Settings", path: "/settings" },
+    { icon: Users, label: "Add Students", path: "/addStudents" },
+    // { icon: MapPin, label: "Live Tracking", path: "/tracking" },
+    // { icon: FileText, label: "Reports", path: "/reports" },
+    // { icon: FileText, label: "School List", path: "/schoollist" },
+    // { icon: Settings, label: "Settings", path: "/settings" },
   ]
 
   return (
