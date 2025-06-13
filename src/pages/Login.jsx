@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Bus, Eye, EyeOff } from "lucide-react"
+import axios from "axios"
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -10,11 +11,27 @@ const Login = () => {
   const [password, setPassword] = useState("")
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Simple authentication - in real app, validate with backend
-    if (email && password) {
-      navigate("/")
+
+    try {
+      const response = await axios.post("http://145.223.20.218:2002/api/user/login", {
+        email,
+        password,
+      })
+
+      const token = response.data.data.token
+      const user = response.data.data.user
+
+      // ✅ Store token and user in localStorage
+      localStorage.setItem("token", token)
+      localStorage.setItem("user", JSON.stringify(user))
+
+      console.log("Login successful", user)
+      navigate("/") // Redirect to home/dashboard
+    } catch (error) {
+      console.error("Login error:", error.response?.data?.message || error.message)
+      alert(error.response?.data?.message || "Login failed")
     }
   }
 

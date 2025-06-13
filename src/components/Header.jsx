@@ -1,17 +1,25 @@
 "use client"
 
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Menu, Bell, Search, User, LogOut, Settings } from "lucide-react"
 
 const Header = ({ onMenuClick }) => {
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
+  const navigate = useNavigate()
 
   const notifications = [
     { id: 1, message: "Bus #101 has arrived at school", time: "2 min ago", type: "info" },
     { id: 2, message: "Driver John Smith checked in", time: "5 min ago", type: "success" },
     { id: 3, message: "Route delay reported on Route A", time: "10 min ago", type: "warning" },
   ]
+
+  const handleLogout = () => {
+    localStorage.removeItem("token")
+    localStorage.removeItem("user")
+    navigate("/login") // redirect to login
+  }
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
@@ -100,10 +108,13 @@ const Header = ({ onMenuClick }) => {
                     <span>Settings</span>
                   </a>
                   <hr className="my-2" />
-                  <a href="#" className="flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left flex items-center space-x-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
                     <LogOut className="w-4 h-4" />
                     <span>Sign out</span>
-                  </a>
+                  </button>
                 </div>
               </div>
             )}
