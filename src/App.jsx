@@ -13,6 +13,7 @@ import Login from "./pages/Login"
 import TEST from "./pages/TEST"
 import "./index.css"
 import SchoolList from "./pages/SchoolList"
+import AddStudents from "./pages/AddStudents"
 
 // 145.223.20.218:2002/api
 
@@ -28,6 +29,7 @@ function App() {
           <Route path="students" element={<StudentManagement />} />
           <Route path="routes" element={<RouteManagement />} />
           <Route path="schools" element={<SchoolManagement />} />
+          <Route path="addStudents" element={<AddStudents />} />
           <Route path="tracking" element={<LiveTracking />} />
           <Route path="reports" element={<Reports />} />
           <Route path="schoollist" element={<SchoolList />} />
