@@ -100,7 +100,7 @@ const Header = ({ onMenuClick }) => {
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
                 <div className="py-2">
   
-                  <a href="#" className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <a href="changepassword" className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     <Settings className="w-4 h-4" />
                     <span>Settings</span>
                   </a>

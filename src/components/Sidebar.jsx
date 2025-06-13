@@ -9,6 +9,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { icon: LayoutDashboard, label: "Dashboard", path: "/" },
     // { icon: Bus, label: "Bus Management", path: "/buses" },
     { icon: Users, label: "Driver Management", path: "/drivers" },
+    { icon: Users, label: "Conductor Management", path: "/conductor" },
     // { icon: GraduationCap, label: "Student Management", path: "/students" },
     // { icon: Map, label: "Route Management", path: "/routes" },
     { icon: School, label: "School Management", path: "/schools" },
@@ -33,7 +34,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       `}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between h-16 px-6 gradient-primary">
+        <div className="flex items-center justify-between h-16 px-4 gradient-primary">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center">
               <Bus className="w-5 h-5 text-secondary-500" />
@@ -46,7 +47,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="mt-8 px-4">
+        <nav className="mt-8 ">
           <ul className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon
@@ -59,10 +60,9 @@ const Sidebar = ({ isOpen, onClose }) => {
                     onClick={onClose}
                     className={`
                       flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors duration-200
-                      ${
-                        isActive
-                          ? "bg-primary-100 text-primary-700 border-r-4 border-primary-500"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                      ${isActive
+                        ? "bg-primary-100 text-primary-700 border-r-4 border-primary-500"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                       }
                     `}
                   >

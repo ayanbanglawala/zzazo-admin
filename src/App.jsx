@@ -14,6 +14,9 @@ import TEST from "./pages/TEST"
 import "./index.css"
 import SchoolList from "./pages/SchoolList"
 import AddStudents from "./pages/AddStudents"
+import ConductorManagement from "./pages/ConductorManagement"
+import Changepassword from "./pages/Changepassword"
+import Profile from "./pages/Profile"
 
 // 145.223.20.218:2002/api
 
@@ -26,6 +29,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="buses" element={<BusManagement />} />
           <Route path="drivers" element={<DriverManagement />} />
+          <Route path="conductor" element={<ConductorManagement />} />
           <Route path="students" element={<StudentManagement />} />
           <Route path="routes" element={<RouteManagement />} />
           <Route path="schools" element={<SchoolManagement />} />
@@ -34,6 +38,8 @@ function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="schoollist" element={<SchoolList />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="changepassword" element={<Changepassword />} />
+          <Route path="profile" element={<Profile />} />
           <Route path="TEST" element={<TEST />} />
         </Route>
       </Routes>

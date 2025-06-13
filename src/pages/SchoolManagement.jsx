@@ -26,13 +26,8 @@ const SchoolManagement = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalSchools, setTotalSchools] = useState(0);
   const [limit, setLimit] = useState(10);
-  // Add these new states for Excel upload
-  const [isExcelModalOpen, setIsExcelModalOpen] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState(null); // 'success', 'error', null
 
-  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Mzg2OWYyNmE5NDI5ODk1Y2QxN2ExNyIsInJvbGUiOiJTQ0hPT0xfQURNSU4iLCJpYXQiOjE3NDk2NDU4OTUsImV4cCI6MTc1MDI1MDY5NX0.J0f25XTF5J6-UHZ0-x_1JP_pMHBAcQsIkg4IjU0qEa4";
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchSchools = async () => {
@@ -207,62 +202,6 @@ const SchoolManagement = () => {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
-  // Add this new function for Excel upload
-  const handleExcelUpload = async () => {
-    if (!selectedFile) {
-      alert("Please select a file first");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    try {
-      setUploadStatus(null);
-      setUploadProgress(0);
-
-      const response = await axios.post(
-        "http://145.223.20.218:2002/api/student/excel-upload/683869f26a9429895cd17a15",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            setUploadProgress(percentCompleted);
-          },
-        }
-      );
-
-      setUploadStatus("success");
-      // Refresh schools list after successful upload
-      const schoolsResponse = await axios.get(
-        `http://145.223.20.218:2002/api/school/getall?page=${currentPage}&limit=${limit}&search=${searchTerm}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setSchools(schoolsResponse.data.data.schools);
-
-      // Reset after 3 seconds
-      setTimeout(() => {
-        setIsExcelModalOpen(false);
-        setSelectedFile(null);
-        setUploadProgress(0);
-        setUploadStatus(null);
-      }, 3000);
-    } catch (error) {
-      console.error("Error uploading file:", error);
-      setUploadStatus("error");
-    }
-  };
-
   return (
     <div className="space-y-6 animate-slide-in">
       {/* Header */}
@@ -273,13 +212,6 @@ const SchoolManagement = () => {
           <p className="text-gray-600 mt-1">Manage schools and their transportation requirements.</p>
         </div>
         <div className="flex space-x-4 mt-4 md:mt-0">
-          <button
-            onClick={() => setIsExcelModalOpen(true)}
-            className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-6 py-2 rounded-xl hover:scale-105 transition-all duration-300 flex items-center space-x-2"
-          >
-            <Upload className="w-5 h-5" />
-            <span>Upload Excel</span>
-          </button>
           <button
             onClick={() => setIsModalOpen(true)}
             className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white px-6 py-2 rounded-xl hover:scale-105 transition-all duration-300 flex items-center space-x-2"
@@ -513,97 +445,10 @@ const SchoolManagement = () => {
           </div>
         </div>
       )}
-      {/* Excel Upload Modal */}
-      {isExcelModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center !mt-0">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
-            <h2 className="text-xl font-semibold mb-4">Upload Schools via Excel</h2>
-
-            <div className="space-y-4">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                <input
-                  type="file"
-                  id="excel-upload"
-                  accept=".xlsx, .xls, .csv"
-                  onChange={(e) => setSelectedFile(e.target.files[0])}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="excel-upload"
-                  className="cursor-pointer flex flex-col items-center justify-center space-y-2"
-                >
-                  <Upload className="w-10 h-10 text-gray-400" />
-                  <p className="text-sm text-gray-600">
-                    {selectedFile
-                      ? selectedFile.name
-                      : "Click to select Excel file (.xlsx, .xls, .csv)"}
-                  </p>
-                  {selectedFile && (
-                    <p className="text-xs text-gray-500">
-                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  )}
-                </label>
-              </div>
-
-              {uploadProgress > 0 && (
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                  <div
-                    className={`h-2.5 rounded-full ${uploadStatus === "error"
-                      ? "bg-red-500"
-                      : uploadStatus === "success"
-                        ? "bg-green-500"
-                        : "bg-blue-500"
-                      }`}
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
-                </div>
-              )}
-
-              {uploadStatus === "success" && (
-                <div className="p-3 bg-green-100 text-green-700 rounded-lg text-sm">
-                  File uploaded successfully!
-                </div>
-              )}
-
-              {uploadStatus === "error" && (
-                <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">
-                  Error uploading file. Please try again.
-                </div>
-              )}
-            </div>
-
-            <div className="mt-6 flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setIsExcelModalOpen(false);
-                  setSelectedFile(null);
-                  setUploadProgress(0);
-                  setUploadStatus(null);
-                }}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleExcelUpload}
-                disabled={!selectedFile || uploadStatus === "success"}
-                className={`px-4 py-2 rounded-lg text-white ${!selectedFile || uploadStatus === "success"
-                  ? "bg-blue-300 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-600"
-                  }`}
-              >
-                {uploadStatus === "success" ? "Uploaded" : "Upload"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
 export default SchoolManagement;
-
 
 // https://grey-moon-879537.postman.co/workspace/Projects-All~547efedb-e485-42fa-80b9-d9cc2615e266/request/24285490-45794b52-a89b-4a83-a290-b9de224cbb40
