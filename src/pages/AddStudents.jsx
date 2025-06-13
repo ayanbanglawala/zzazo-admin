@@ -60,19 +60,21 @@ const AddStudents = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState(null);
 
-  const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Mzg2OWYyNmE5NDI5ODk1Y2QxN2ExNyIsInJvbGUiOiJTQ0hPT0xfQURNSU4iLCJpYXQiOjE3NDk2NDU4OTUsImV4cCI6MTc1MDI1MDY5NX0.J0f25XTF5J6-UHZ0-x_1JP_pMHBAcQsIkg4IjU0qEa4";
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await axios.get(`http://145.223.20.218:2002/api/student/getall?page=${currentPage}&limit=${limit}&search=${searchTerm}`, {
+        const response = await axios.get(`http://145.223.20.218:2002/api/user/getuserByschool/684a819ea8c7f1bdd04732f8?page=${currentPage}&limit=${limit}&search=${searchTerm}&role=PARENT`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        setStudents(response.data.data.students);
-        setTotalPages(response.data.data.totalPages);
-        setTotalStudents(response.data.data.total);
+        setStudents(response.data.data);
+        console.log(response.data.data);
+        
+        // setTotalPages(response.data.data.totalPages);
+        // setTotalStudents(response.data.data.total);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching students:", error);

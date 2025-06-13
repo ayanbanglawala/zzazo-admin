@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate,Link  } from "react-router-dom"
 import { Menu, Bell, Search, User, LogOut, Settings } from "lucide-react"
 
 const Header = ({ onMenuClick }) => {
@@ -33,7 +33,7 @@ const Header = ({ onMenuClick }) => {
             <Menu className="w-6 h-6" />
           </button>
 
-          <div className="hidden md:block">
+          {/* <div className="hidden md:block">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -42,7 +42,7 @@ const Header = ({ onMenuClick }) => {
                 className="pl-10 pr-4 py-2 w-80 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Right side */}
@@ -99,10 +99,7 @@ const Header = ({ onMenuClick }) => {
             {showProfileMenu && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
                 <div className="py-2">
-                  <a href="#" className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    <User className="w-4 h-4" />
-                    <span>Profile</span>
-                  </a>
+  
                   <a href="#" className="flex items-center space-x-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                     <Settings className="w-4 h-4" />
                     <span>Settings</span>

@@ -8,54 +8,55 @@ const DriverManagement = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [filterStatus, setFilterStatus] = useState("all")
   const [drivers, setDrivers] = useState([])
-  const [isModalOpen, setIsModalOpen] = useState(false) // ✅ Added missing state
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [currentDriverId, setCurrentDriverId] = useState(null)
 
-  //post aip
-const [newDriver, setNewDriver] = useState({
-  name: "",
-  shift: "",
-  email: "",
-  mobile: ""
-})
-  const token =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4Mzg2OWYyNmE5NDI5ODk1Y2QxN2ExNyIsInJvbGUiOiJTQ0hPT0xfQURNSU4iLCJpYXQiOjE3NDk3OTU4MzUsImV4cCI6MTc1MDQwMDYzNX0.13Pap9O4pK96K_2kF0O50EOm7X1ksjJA9xOKqiYVzxE"
+  const [driverForm, setDriverForm] = useState({
+    name: "",
+    shift: "",
+    email: "",
+    mobile: ""
+  })
+
+  const token = localStorage.getItem('token')
 
   useEffect(() => {
-    const fetchDrivers = async () => {
-      try {
-        const params = new URLSearchParams({
-          page: 1,
-          limit: 10,
-          role: "DRIVER",
-          search: searchTerm || "",
-          status: filterStatus !== "all" ? filterStatus : "",
-        })
-
-        const response = await axios.get(
-          `http://145.223.20.218:2002/api/user/getuserByschool/683869f26a9429895cd17a15?${params.toString()}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-
-        const data = response.data?.data
-        if (Array.isArray(data)) {
-          setDrivers(data)
-        } else if (Array.isArray(data?.users)) {
-          setDrivers(data.users)
-        } else {
-          setDrivers([])
-        }
-      } catch (error) {
-        console.error("Failed to fetch drivers:", error)
-        setDrivers([])
-      }
-    }
-
     fetchDrivers()
   }, [searchTerm, filterStatus])
+
+  const fetchDrivers = async () => {
+    try {
+      const params = new URLSearchParams({
+        page: 1,
+        limit: 10,
+        role: "DRIVER",
+        search: searchTerm || "",
+        status: filterStatus !== "all" ? filterStatus : "",
+      })
+
+      const response = await axios.get(
+        `http://145.223.20.218:2002/api/user/getuserByschool/684a819ea8c7f1bdd04732f8?${params.toString()}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+
+      const data = response.data?.data
+      if (Array.isArray(data)) {
+        setDrivers(data)
+      } else if (Array.isArray(data?.users)) {
+        setDrivers(data.users)
+      } else {
+        setDrivers([])
+      }
+    } catch (error) {
+      console.error("Failed to fetch drivers:", error)
+      setDrivers([])
+    }
+  }
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -83,33 +84,129 @@ const [newDriver, setNewDriver] = useState({
     })
     : []
 
-  const registerSchool = async (schoolData) => {
-    // Placeholder - implement actual API call if needed
-    console.log("Registering new school", schoolData)
-    alert("School registered (mock)")
-  }
-
-
-  const registerDriver = async (driverData) => {
-  try {
-    const response = await axios.post(
-      "http://145.223.20.218:2002/api/user/add-driver/684a819ea8c7f1bdd04732f8",
-      driverData,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
+  const handleToggleStatus = async (driverId, newStatus) => {
+    try {
+      await axios.put(
+        `http://145.223.20.218:2002/api/user/update-status/${driverId}`,
+        { isActive: newStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
-      }
-    )
-    alert("Driver added successfully!")
-    return response.data
-  } catch (error) {
-    console.error("Failed to add driver:", error)
-    throw error
-  }
-}
+      )
 
+      setDrivers((prev) =>
+        prev.map((driver) =>
+          driver._id === driverId ? { ...driver, isActive: newStatus } : driver
+        )
+      )
+    } catch (error) {
+      console.error("Failed to update status:", error)
+      alert("Status update failed.")
+    }
+  }
+
+  // ADD NEW DRIVER
+  const registerDriver = async (driverData) => {
+    try {
+      await axios.post(
+        "http://145.223.20.218:2002/api/user/add-driver/684a819ea8c7f1bdd04732f8",
+        driverData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      )
+      alert("Driver added successfully!")
+      fetchDrivers()
+      return true
+    } catch (error) {
+      console.error("Failed to add driver:", error)
+      throw error
+    }
+  }
+
+  // EDIT DRIVER
+  const editDriver = async (driverId, driverData) => {
+    try {
+      await axios.put(
+        `http://145.223.20.218:2002/api/user/update-driver/${driverId}`,
+        driverData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      )
+      alert("Driver updated successfully!")
+      fetchDrivers()
+      return true
+    } catch (error) {
+      console.error("Failed to update driver:", error)
+      throw error
+    }
+  }
+
+  // DELETE DRIVER
+  const deleteDriver = async (driverId) => {
+    if (!window.confirm("Are you sure you want to delete this driver?")) return
+    
+    try {
+      await axios.delete(
+        `http://145.223.20.218:2002/api/user/delete-driver/${driverId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+      alert("Driver deleted successfully!")
+      fetchDrivers()
+    } catch (error) {
+      console.error("Failed to delete driver:", error)
+      alert("Delete failed. Please try again.")
+    }
+  }
+
+  // OPEN EDIT MODAL
+  const openEditModal = (driver) => {
+    setDriverForm({
+      name: driver.name,
+      shift: driver.shift,
+      email: driver.email,
+      mobile: driver.mobile
+    })
+    setCurrentDriverId(driver._id)
+    setIsEditMode(true)
+    setIsModalOpen(true)
+  }
+
+  // HANDLE FORM SUBMIT
+  const handleSubmit = async () => {
+    try {
+      if (isEditMode) {
+        await editDriver(currentDriverId, driverForm)
+      } else {
+        await registerDriver(driverForm)
+      }
+      closeModal()
+    } catch {
+      alert(`Operation failed. Please try again.`)
+    }
+  }
+
+  // CLOSE MODAL AND RESET FORM
+  const closeModal = () => {
+    setIsModalOpen(false)
+    setIsEditMode(false)
+    setCurrentDriverId(null)
+    setDriverForm({ name: "", shift: "", email: "", mobile: "" })
+  }
 
   return (
     <div className="space-y-6 animate-slide-in">
@@ -142,7 +239,7 @@ const [newDriver, setNewDriver] = useState({
                 className="pl-10 pr-4 py-2 w-full md:w-80 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
             </div>
-            <select
+            {/* <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
               className="px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent"
@@ -151,7 +248,7 @@ const [newDriver, setNewDriver] = useState({
               <option value="active">Active</option>
               <option value="on_leave">On Leave</option>
               <option value="inactive">Inactive</option>
-            </select>
+            </select> */}
           </div>
           <div className="flex items-center space-x-2">
             <Filter className="w-5 h-5 text-gray-400" />
@@ -171,9 +268,8 @@ const [newDriver, setNewDriver] = useState({
                 <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Phone</th>
                 <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Email</th>
                 <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Shift</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Bus</th>
-                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Route</th>
-                {/* <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Experience</th> */}
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Role</th>
+                <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Change Status</th>
                 <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Status</th>
                 <th className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Actions</th>
               </tr>
@@ -182,23 +278,62 @@ const [newDriver, setNewDriver] = useState({
               {filteredDrivers.map((driver, index) => (
                 <tr key={driver.id || index} className="hover:bg-gray-50 text-center">
                   <td className="px-6 py-4 text-sm text-gray-900">{index + 1}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{driver.name || "N/A"}</td>
+
+                      <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="w-10 h-8 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        {driver.name
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")}
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900 text-center">{driver.name || "N/A"}</div>
+                      </div>
+                    </div>
+                  </td>
+                  {/* <td className="px-6 py-4 text-sm text-gray-900"></td> */}
                   <td className="px-6 py-4 text-sm text-gray-900">{driver.mobile || "N/A"}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{driver.email || "N/A"}</td>
                   <td className="px-6 py-4 text-sm text-gray-900">{driver.shift || "N/A"}</td>
-                  {/* <td className="px-6 py-4 text-sm text-gray-900">{driver.bus || "N/A"}</td> */}
-                  <td className="px-6 py-4 text-sm text-gray-900">{driver.route || "N/A"}</td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{driver.experience || "N/A"}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(driver.isActive ? "active" : "inactive")}`}>
-                      {driver.isActive ? "Active" : "Inactive"}
-                    </span>
+                  <td className="px-6 py-4 text-sm text-gray-900">{driver.role || "N/A"}</td>
+                  <td>    
+                    <label className="inline-flex relative items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={driver.isActive}
+                        onChange={() => handleToggleStatus(driver._id, !driver.isActive)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:bg-green-500 relative after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
+                    </label>
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex items-center justify-center space-x-2">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(driver.isActive ? "active" : "inactive")}`}
+                      >
+                        {driver.isActive ? "Active" : "Inactive"}
+                      </span>
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-2 justify-center">
-                      <button className="text-blue-600 hover:text-blue-900"><Eye className="w-4 h-4" /></button>
-                      <button className="text-green-600 hover:text-green-900"><Edit className="w-4 h-4" /></button>
-                      <button className="text-red-600 hover:text-red-900"><Trash2 className="w-4 h-4" /></button>
+                        <button className="text-blue-600 hover:text-blue-900">
+                                              <Eye className="w-4 h-4" />
+                                            </button>
+                      <button 
+                        onClick={() => openEditModal(driver)} 
+                        className="text-green-600 hover:text-green-900"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => deleteDriver(driver._id)} 
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -209,66 +344,59 @@ const [newDriver, setNewDriver] = useState({
       </div>
 
       {/* Modal */}
-   {isModalOpen && (
-  <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center !mt-0">
-    <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
-      <h2 className="text-xl font-semibold mb-4">Add New Driver</h2>
-      <div className="space-y-4">
-        <input
-          type="text"
-          placeholder="Name"
-          value={newDriver.name}
-          onChange={(e) => setNewDriver({ ...newDriver, name: e.target.value })}
-          className="w-full px-4 py-2 border rounded-lg"
-        />
-        <input
-          type="text"
-          placeholder="Shift (e.g. Morning)"
-          value={newDriver.shift}
-          onChange={(e) => setNewDriver({ ...newDriver, shift: e.target.value })}
-          className="w-full px-4 py-2 border rounded-lg"
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={newDriver.email}
-          onChange={(e) => setNewDriver({ ...newDriver, email: e.target.value })}
-          className="w-full px-4 py-2 border rounded-lg"
-        />
-        <input
-          type="text"
-          placeholder="Mobile"
-          value={newDriver.mobile}
-          onChange={(e) => setNewDriver({ ...newDriver, mobile: e.target.value })}
-          className="w-full px-4 py-2 border rounded-lg"
-        />
-      </div>
-      <div className="mt-6 flex justify-end space-x-3">
-        <button
-          onClick={() => setIsModalOpen(false)}
-          className="px-4 py-2 border rounded-lg"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={async () => {
-            try {
-              await registerDriver(newDriver)
-              setIsModalOpen(false)
-              setNewDriver({ name: "", shift: "", email: "", mobile: "" })
-            } catch {
-              alert("Failed to add driver.")
-            }
-          }}
-          className="px-4 py-2 bg-primary-500 text-white rounded-lg"
-        >
-          Add Driver
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center !mt-0">
+          <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
+            <h2 className="text-xl font-semibold mb-4">
+              {isEditMode ? "Edit Driver" : "Add New Driver"}
+            </h2>
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Name"
+                value={driverForm.name}
+                onChange={(e) => setDriverForm({ ...driverForm, name: e.target.value })}
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+              <input
+                type="text"
+                placeholder="Shift (e.g. Morning)"
+                value={driverForm.shift}
+                onChange={(e) => setDriverForm({ ...driverForm, shift: e.target.value })}
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={driverForm.email}
+                onChange={(e) => setDriverForm({ ...driverForm, email: e.target.value })}
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+              <input
+                type="text"
+                placeholder="Mobile"
+                value={driverForm.mobile}
+                onChange={(e) => setDriverForm({ ...driverForm, mobile: e.target.value })}
+                className="w-full px-4 py-2 border rounded-lg"
+              />
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={closeModal}
+                className="px-4 py-2 border rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="px-4 py-2 bg-primary-500 text-white rounded-lg"
+              >
+                {isEditMode ? "Update Driver" : "Add Driver"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
